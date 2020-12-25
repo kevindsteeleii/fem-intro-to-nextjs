@@ -1,16 +1,13 @@
 // pages/notes/[id].jsx
 import React from 'react'
-import { useRouter } from 'next/router'
 import Link from 'next/link'
 
-const NotePage = () => {
-  const router = useRouter()
-  const { id }= router.query
+const NotePage = ({note}) => {
 
   return (
     <div>
-      <h1>Note: {id} </h1>
-
+      <h1>Note: {note.title} </h1>
+      <p>Data Id is: {note.id}</p>
       <Link href="/notes">
         <a>Notes</a>
       </Link>
@@ -19,3 +16,24 @@ const NotePage = () => {
 }
 
 export default NotePage;
+
+
+export async function getServerSideProps({ params, req, res }) {
+  // console.log(req);
+
+  const response = await fetch(`http://localhost:3000/api/note/${params.id}`);
+
+  if(!response.ok) {
+    res.writeHead(302, { location: '/notes' });
+    res.end();
+    return { props: {}};
+  }
+
+  const {data} = await response.json();
+
+  if(data) {
+    return {
+      props: {note: data}
+    }
+  }
+}
